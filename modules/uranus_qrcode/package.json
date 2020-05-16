@@ -1,0 +1,15 @@
+{
+  "name": "uranus-qrcode",
+  "collaborators": [
+    "Aero <aero.windwalker@gmail.com>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "uranus_qrcode_bg.wasm",
+    "uranus_qrcode.js",
+    "uranus_qrcode.d.ts"
+  ],
+  "module": "uranus_qrcode.js",
+  "types": "uranus_qrcode.d.ts",
+  "sideEffects": false
+}

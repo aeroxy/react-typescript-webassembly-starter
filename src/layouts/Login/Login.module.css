@@ -1,0 +1,34 @@
+.root {
+  height: 100vh;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+.paper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 5%;
+}
+.avatar {
+  padding: 5px;
+  width: 60px !important;
+  height: 60px !important;
+  background: linear-gradient(0deg, #03a9f4, #e1f5fe);
+  margin-bottom: 10px;
+}
+.submit {
+  margin-top: 10px !important;
+}
+.form {
+  width: 100%;
+}
+.buttonProgress {
+  color: black !important;
+  margin-right: 10px;
+}
+.center {
+  text-align: center;
+}
