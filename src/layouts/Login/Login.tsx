@@ -36,19 +36,13 @@ the prototype will not be added to the worker
 (suspecting it's a bug in workerize-loader
 because all workerized modules behave the same). */
 // eslint-disable-next-line import/no-webpack-loader-syntax
-// import qrCodeWorker_Workerize from 'workerize-loader!workers/qrCodeWorker_Workerize';
+import qrCodeWorker_Workerize from 'workerize-loader!workers/qrCodeWorker_Workerize';
 
 import useMountedState from 'hooks/useMountedState';
 import CustomSnackbar from 'components/CustomSnackbar/CustomSnackbar';
 import css from './Login.module.css';
 import logo from 'assets/svg/logo.svg';
 import { qrString } from 'config';
-
-interface LoginRequestData {
-  username: string;
-  password: string;
-  hash: string;
-}
 
 interface LoginDefaultState {
   open: boolean;
@@ -87,26 +81,26 @@ const Login:FunctionComponent = () => {
     //   qrcode: generateQRCode
     // });
     /* Workerize Method (failed after compiling)*/
-    // const instance = new qrCodeWorker_Workerize();
-    // console.log({
-    //   instance
-    // });
-    // const {
-    //   href,
-    //   qr
-    // } = await instance.getQRCode({
-    //   href: qrString,
-    //   width: 150,
-    //   height: 150
-    // })
-    // console.log({
-    //   href,
-    //   qr
-    // });
+    const instance = new qrCodeWorker_Workerize();
+    console.log({
+      instance
+    });
+    const {
+      href,
+      qr
+    } = await instance.getQRCode({
+      href: qrString,
+      width: 150,
+      height: 150
+    })
+    console.log({
+      href,
+      qr
+    });
     /* Mainthread Method */
-    const { qrcode } = await import('uranus-qrcode');
-    const qr = qrcode(qrString, 150, 150);
-    const href = qrString;
+    // const { qrcode } = await import('uranus-qrcode');
+    // const qr = qrcode(qrString, 150, 150);
+    // const href = qrString;
     /* Set QRcode if href matches qrString
     (in this case it is always the same
     but not in a real world example) */
