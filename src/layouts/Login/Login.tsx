@@ -44,12 +44,6 @@ import css from './Login.module.css';
 import logo from 'assets/svg/logo.svg';
 import { qrString } from 'config';
 
-interface LoginRequestData {
-  username: string;
-  password: string;
-  hash: string;
-}
-
 interface LoginDefaultState {
   open: boolean;
   status: string;
