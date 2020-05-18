@@ -44,7 +44,7 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 现在workrize模式可以正常使用了！
 
-我最初尝试了workerize-loader + wasm-loader，它在dev模式下工作得很好，但是一旦编译，就不会将原型添加到worker中（怀疑这是workerize-loader中的错误，因为无论是否有WASM它都有这个问题）。实时证明它确实是workerize的一个缺陷(看[workerize-loader failed to work after compiling](https://github.com/developit/workerize-loader/issues/89)和[Version 1.2.0 does not export function on worker instance in production mode](https://github.com/developit/workerize-loader/issues/85)).在升级到[workerize-loader 1.2.1](https://github.com/developit/workerize-loader/commit/d586b51aa0f3eda94aa5b3e7d9881c9d9b804cdc)以后无论开发还是生成代码都能够正常使用了。
+我最初尝试了workerize-loader + wasm-loader，它在dev模式下工作得很好，但是一旦编译，就不会将原型添加到worker中（怀疑这是workerize-loader中的错误，因为无论是否有WASM它都有这个问题）。实时证明它确实是workerize的一个缺陷(看[workerize-loader failed to work after compiling](https://github.com/developit/workerize-loader/issues/89)和[Version 1.2.0 does not export function on worker instance in production mode](https://github.com/developit/workerize-loader/issues/85))。在升级到[workerize-loader 1.2.1](https://github.com/developit/workerize-loader/commit/d586b51aa0f3eda94aa5b3e7d9881c9d9b804cdc)以后无论开发还是生成代码都能够正常使用了。
 
 我也尝试使用worker-loader + comlink，但是worker-loader似乎无法与wasm-loader一起使用（将无法将WASM导入到worker中）。 我还尝试将WASM模块加载到主线程中，然后将其传递给Web Worker，但这会导致浏览器报错。你可以试试看有没有办法让它能够正常工作……
 
