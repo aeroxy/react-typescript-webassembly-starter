@@ -30,11 +30,9 @@ but it breaks the browser. */
 // import qrCodeWorker_Comlink from 'worker-loader!workers/qrCodeWorker_Comlink';
 // import qrCodeWorker_Comlink2 from 'worker-loader!workers/qrCodeWorker_Comlink2';
 
-/* I've tried workerize-loader + wasm-loader,
-and it works pretty well in the dev mode but once it is compiled,
-the prototype will not be added to the worker
-(suspecting it's a bug in workerize-loader
-because all workerized modules behave the same). */
+/* Workerize version works!
+It should be initialized only once
+to avoid creating a sea of workers */
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import qrCodeWorker_Workerize from 'workerize-loader!workers/qrCodeWorker_Workerize';
 
@@ -50,6 +48,8 @@ interface LoginDefaultState {
   message: string;
   loading: boolean;
 }
+
+const qrCodeWorker_Workerize_Instance = qrCodeWorker_Workerize();
 
 const Login:FunctionComponent = () => {
   const defaultState: LoginDefaultState = {
@@ -81,14 +81,10 @@ const Login:FunctionComponent = () => {
     //   qrcode: generateQRCode
     // });
     /* Workerize Method (failed after compiling)*/
-    const instance = new qrCodeWorker_Workerize();
-    console.log({
-      instance
-    });
     const {
       href,
       qr
-    } = await instance.getQRCode({
+    } = await qrCodeWorker_Workerize_Instance.getQRCode({
       href: qrString,
       width: 150,
       height: 150
