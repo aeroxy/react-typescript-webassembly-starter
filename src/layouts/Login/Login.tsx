@@ -25,16 +25,17 @@ I also tried to load the WASM module into the main thread
 and then passing it to the Web Worker,
 but it breaks the browser. */
 
-// import { wrap } from 'comlink';
+import { wrap } from 'comlink';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 // import qrCodeWorker_Comlink from 'worker-loader!workers/qrCodeWorker_Comlink';
-// import qrCodeWorker_Comlink2 from 'worker-loader!workers/qrCodeWorker_Comlink2';
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import qrCodeWorker_Comlink from 'worker-loader!workers/qrCodeWorker_Comlink2';
 
 /* Workerize version works!
 It should be initialized only once
 to avoid creating a sea of workers */
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import qrCodeWorker_Workerize from 'workerize-loader!workers/qrCodeWorker_Workerize';
+// import qrCodeWorker_Workerize from 'workerize-loader!workers/qrCodeWorker_Workerize';
 
 import useMountedState from 'hooks/useMountedState';
 import CustomSnackbar from 'components/CustomSnackbar/CustomSnackbar';
@@ -49,7 +50,8 @@ interface LoginDefaultState {
   loading: boolean;
 }
 
-const qrCodeWorker_Workerize_Instance = qrCodeWorker_Workerize();
+// const qrCodeWorker_Workerize_Instance = qrCodeWorker_Workerize();
+const qrCodeWorker_Comlink_Instance = new qrCodeWorker_Comlink();
 
 const Login:FunctionComponent = () => {
   const defaultState: LoginDefaultState = {
@@ -64,35 +66,34 @@ const Login:FunctionComponent = () => {
   });
   const loadQRCode = async () => {
     /* Comlink method (failed)*/
-    // const instance = new qrCodeWorker_Comlink();
-    // const { generate } = await wrap(instance);
+    const { generate } = await wrap(qrCodeWorker_Comlink_Instance);
     // const { qrcode: generateQRCode } = await import('uranus-qrcode');
-    // console.log({
-    //   generateQRCode,
-    //   instance
-    // });
-    // const {
-    //   href,
-    //   qr
-    // } = await generate({
-    //   href: qrString,
-    //   width: 150,
-    //   height: 150,
-    //   qrcode: generateQRCode
-    // });
-    /* Workerize Method (failed after compiling)*/
+    console.log({
+      // generateQRCode,
+      generate
+    });
     const {
       href,
       qr
-    } = await qrCodeWorker_Workerize_Instance.getQRCode({
+    } = await generate({
       href: qrString,
       width: 150,
-      height: 150
-    })
-    console.log({
-      href,
-      qr
+      height: 150,
+      // qrcode: generateQRCode
     });
+    /* Workerize Method (failed after compiling)*/
+    // const {
+    //   href,
+    //   qr
+    // } = await qrCodeWorker_Workerize_Instance.getQRCode({
+    //   href: qrString,
+    //   width: 150,
+    //   height: 150
+    // })
+    // console.log({
+    //   href,
+    //   qr
+    // });
     /* Mainthread Method */
     // const { qrcode } = await import('uranus-qrcode');
     // const qr = qrcode(qrString, 150, 150);
