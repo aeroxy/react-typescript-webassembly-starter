@@ -37,11 +37,19 @@ module.exports = override(
     config.resolve.extensions.push('.wasm');
 
     config.module.rules.push({
+      test: /qrCodeWorker_Workerize.js$/,
+      include: path.resolve(__dirname, 'src', 'workers'),
+      use: [{ loader: require.resolve('workerize-loader'), options: {} }]
+    });
+
+    config.module.rules.push({
       test: wasmExtensionRegExp,
       include: path.resolve(__dirname, 'src'),
       use: [{ loader: require.resolve('wasm-loader'), options: {} }]
     });
+
     
+
     return config;
   },
   useBabelRc(),

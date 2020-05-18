@@ -9,3 +9,5 @@ export const getQRCode = async ({
     qr: qrcode(href, width, height)
   };
 };
+
+export default function () { }

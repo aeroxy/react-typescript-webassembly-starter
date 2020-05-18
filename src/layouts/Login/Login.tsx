@@ -1,22 +1,20 @@
 import React, {
-  FunctionComponent,
-  SyntheticEvent,
-  useEffect,
-  useState
-} from 'react';
+    FunctionComponent,
+    SyntheticEvent,
+    useEffect,
+    useState,
+} from "react";
+import { useHistory } from "react-router-dom";
 import {
-  useHistory
-} from 'react-router-dom';
-import {
-  Avatar,
-  Button,
-  TextField,
-  Paper,
-  Grid,
-  CircularProgress,
-  Typography,
-  Snackbar
-} from '@material-ui/core';
+    Avatar,
+    Button,
+    TextField,
+    Paper,
+    Grid,
+    CircularProgress,
+    Typography,
+    Snackbar,
+} from "@material-ui/core";
 
 /* I tried to work with worker-loader + comlink,
 but the worker-loader doesn't seem to work with wasm-loader
@@ -36,227 +34,243 @@ the prototype will not be added to the worker
 (suspecting it's a bug in workerize-loader
 because all workerized modules behave the same). */
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import qrCodeWorker_Workerize from 'workerize-loader!workers/qrCodeWorker_Workerize';
+import qrCodeWorker_Workerize from "workers/qrCodeWorker_Workerize";
 
-import useMountedState from 'hooks/useMountedState';
-import CustomSnackbar from 'components/CustomSnackbar/CustomSnackbar';
-import css from './Login.module.css';
-import logo from 'assets/svg/logo.svg';
-import { qrString } from 'config';
+import useMountedState from "hooks/useMountedState";
+import CustomSnackbar from "components/CustomSnackbar/CustomSnackbar";
+import css from "./Login.module.css";
+import logo from "assets/svg/logo.svg";
+import { qrString } from "config";
+import { RestaurantRounded } from "@material-ui/icons";
 
 interface LoginDefaultState {
-  open: boolean;
-  status: string;
-  message: string;
-  loading: boolean;
+    open: boolean;
+    status: string;
+    message: string;
+    loading: boolean;
 }
 
-const Login:FunctionComponent = () => {
-  const defaultState: LoginDefaultState = {
-    open: false,
-    status: 'info',
-    message: '',
-    loading: false
-  };
-  const { state, setState } = useMountedState(defaultState);
-  const [ qrcode, setQRCode ] = useState({
-    __html: ''
-  });
-  const loadQRCode = async () => {
-    /* Comlink method (failed)*/
-    // const instance = new qrCodeWorker_Comlink();
-    // const { generate } = await wrap(instance);
-    // const { qrcode: generateQRCode } = await import('uranus-qrcode');
-    // console.log({
-    //   generateQRCode,
-    //   instance
-    // });
-    // const {
-    //   href,
-    //   qr
-    // } = await generate({
-    //   href: qrString,
-    //   width: 150,
-    //   height: 150,
-    //   qrcode: generateQRCode
-    // });
-    /* Workerize Method (failed after compiling)*/
-    const instance = new qrCodeWorker_Workerize();
-    console.log({
-      instance
+const Login: FunctionComponent = () => {
+    const defaultState: LoginDefaultState = {
+        open: false,
+        status: "info",
+        message: "",
+        loading: false,
+    };
+    const { state, setState } = useMountedState(defaultState);
+    const [qrcode, setQRCode] = useState({
+        __html: "",
     });
-    const {
-      href,
-      qr
-    } = await instance.getQRCode({
-      href: qrString,
-      width: 150,
-      height: 150
-    })
-    console.log({
-      href,
-      qr
-    });
-    /* Mainthread Method */
-    // const { qrcode } = await import('uranus-qrcode');
-    // const qr = qrcode(qrString, 150, 150);
-    // const href = qrString;
-    /* Set QRcode if href matches qrString
+    const loadQRCode = async () => {
+        /* Comlink method (failed)*/
+        // const instance = new qrCodeWorker_Comlink();
+        // const { generate } = await wrap(instance);
+        // const { qrcode: generateQRCode } = await import('uranus-qrcode');
+        // console.log({
+        //   generateQRCode,
+        //   instance
+        // });
+        // const {
+        //   href,
+        //   qr
+        // } = await generate({
+        //   href: qrString,
+        //   width: 150,
+        //   height: 150,
+        //   qrcode: generateQRCode
+        // });
+        /* Workerize Method (failed after compiling)*/
+        const instance = new (qrCodeWorker_Workerize as any)();
+        console.log({
+            instance,
+        });
+
+        if (!instance.getQRCode) {
+            return;
+        }
+
+        const { href, qr } = await instance.getQRCode({
+            href: qrString,
+            width: 150,
+            height: 150,
+        });
+        console.log({
+            href,
+            qr,
+        });
+        /* Mainthread Method */
+        // const { qrcode } = await import('uranus-qrcode');
+        // const qr = qrcode(qrString, 150, 150);
+        // const href = qrString;
+        /* Set QRcode if href matches qrString
     (in this case it is always the same
     but not in a real world example) */
-    if (href === qrString) {
-      setQRCode({
-        __html: qr
-      });
-    }
-  };
-  useEffect(() => {
-    loadQRCode();
-  }, []);
-  let submitting: boolean = false;
-  const history = useHistory();
-  const login = async (e: SyntheticEvent): Promise<void> => {
-    e.preventDefault();
-    if (submitting) {
-      setState({
-        open: true,
-        status: 'info',
-        message: 'Logging in...'
-      });
-      return;
-    }
-    submitting = true;
-    setState({
-      loading: true
-    });
-    try {
-      const result: any = await fetch(window.location.href);
-      console.log({ result });
-      setState({
-        open: true,
-        status: 'success',
-        message: 'You\'ve logged in in theory.',
-        loading: false
-      });
-      history.replace(window.location.pathname);
-    } catch(e) {
-      submitting = false;
-      let message: string = e.message || 'Uknown Error';
-      if (e instanceof ProgressEvent)
-        message = 'NetWork Error';
-      setState({
-        open: true,
-        status: 'error',
+        if (href === qrString) {
+            setQRCode({
+                __html: qr,
+            });
+        }
+    };
+    useEffect(() => {
+        loadQRCode();
+    }, []);
+    let submitting: boolean = false;
+    const history = useHistory();
+    const login = async (e: SyntheticEvent): Promise<void> => {
+        e.preventDefault();
+        if (submitting) {
+            setState({
+                open: true,
+                status: "info",
+                message: "Logging in...",
+            });
+            return;
+        }
+        submitting = true;
+        setState({
+            loading: true,
+        });
+        try {
+            const result: any = await fetch(window.location.href);
+            console.log({ result });
+            setState({
+                open: true,
+                status: "success",
+                message: "You've logged in in theory.",
+                loading: false,
+            });
+            history.replace(window.location.pathname);
+        } catch (e) {
+            submitting = false;
+            let message: string = e.message || "Uknown Error";
+            if (e instanceof ProgressEvent) message = "NetWork Error";
+            setState({
+                open: true,
+                status: "error",
+                message,
+                loading: false,
+            });
+        }
+    };
+
+    const handleClose = (): void => {
+        setState({
+            open: false,
+        });
+    };
+
+    const { innerWidth, innerHeight } = window;
+    const { open, status, message, loading } = state;
+
+    console.log("Login rendering...", {
+        open,
+        status,
         message,
-        loading: false
-      });
-    }
-  };
+        loading,
+    });
 
-  const handleClose = ():void => {
-    setState({
-      open: false
-    })
-  };
-
-  const {
-    innerWidth,
-    innerHeight
-  } = window;
-  const {
-    open,
-    status,
-    message,
-    loading
-  } = state;
-
-  console.log('Login rendering...', {
-    open,
-    status,
-    message,
-    loading
-  });
-
-  return (
-    <>
-      <Grid container component="main" className={css.root} style={{
-        backgroundImage: `url(https://cn.bing.com/ImageResolution.aspx?w=${innerWidth}&h=${innerHeight})`
-      }}>
-        <Grid item xs={false} sm={2} md={4} lg={5}/>
-        <Grid item xs={12} sm={8} md={4} lg={2} component={Paper} elevation={6} square style={{
-          opacity: '0.9'
-        }}>
-          <div className={css.paper}>
-            {
-              qrcode.__html
-                ? (
-                  <>
-                    <div dangerouslySetInnerHTML={qrcode} />
-                    <Typography component="h1" variant="h5" className={css.center}>
-                      The QRcode above is generated via WebAssembly
-                    </Typography>
-                  </>
-                )
-                : (
-                  <>
-                    <Avatar className={css.avatar} src={logo} />
-                  </>
-                )
-            }
-            <form className={css.form} onSubmit={login}>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="username"
-                label="username"
-                name="username"
-                autoFocus
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={css.submit}
-                disabled={loading}
-              >
-                {loading && <CircularProgress size={24} className={css.buttonProgress} />}Login
-              </Button>
-            </form>
-          </div>
-        </Grid>
-        <Grid item xs={false} sm={2} md={4} lg={5}/>
-      </Grid>
-      <Snackbar
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-      >
-        <CustomSnackbar
-          onClose={handleClose}
-          variant={status}
-          message={message}
-        />
-      </Snackbar>
-    </>
-  );
+    return (
+        <>
+            <Grid
+                container
+                component="main"
+                className={css.root}
+                style={{
+                    backgroundImage: `url(https://cn.bing.com/ImageResolution.aspx?w=${innerWidth}&h=${innerHeight})`,
+                }}
+            >
+                <Grid item xs={false} sm={2} md={4} lg={5} />
+                <Grid
+                    item
+                    xs={12}
+                    sm={8}
+                    md={4}
+                    lg={2}
+                    component={Paper}
+                    elevation={6}
+                    square
+                    style={{
+                        opacity: "0.9",
+                    }}
+                >
+                    <div className={css.paper}>
+                        {qrcode.__html ? (
+                            <>
+                                <div dangerouslySetInnerHTML={qrcode} />
+                                <Typography
+                                    component="h1"
+                                    variant="h5"
+                                    className={css.center}
+                                >
+                                    The QRcode above is generated via
+                                    WebAssembly
+                                </Typography>
+                            </>
+                        ) : (
+                            <>
+                                <Avatar className={css.avatar} src={logo} />
+                            </>
+                        )}
+                        <form className={css.form} onSubmit={login}>
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="username"
+                                label="username"
+                                name="username"
+                                autoFocus
+                            />
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="password"
+                                label="password"
+                                type="password"
+                                id="password"
+                                autoComplete="current-password"
+                            />
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                className={css.submit}
+                                disabled={loading}
+                            >
+                                {loading && (
+                                    <CircularProgress
+                                        size={24}
+                                        className={css.buttonProgress}
+                                    />
+                                )}
+                                Login
+                            </Button>
+                        </form>
+                    </div>
+                </Grid>
+                <Grid item xs={false} sm={2} md={4} lg={5} />
+            </Grid>
+            <Snackbar
+                anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                }}
+                open={open}
+                autoHideDuration={6000}
+                onClose={handleClose}
+            >
+                <CustomSnackbar
+                    onClose={handleClose}
+                    variant={status}
+                    message={message}
+                />
+            </Snackbar>
+        </>
+    );
 };
 
 export default Login;
