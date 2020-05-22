@@ -3,6 +3,7 @@ const {
   useBabelRc,
   override
 } = require('customize-cra');
+const worderLoader = require("worker-loader");
 
 const path = require('path');
 
@@ -36,6 +37,13 @@ module.exports = override(
 
     config.resolve.extensions.push('.wasm');
 
+
+    config.module.rules.push({
+      test: /qrCodeWorker_Comlink2.js/,
+      include: path.resolve(__dirname, 'src', 'workers'),
+      use: [{ loader: './modules/worker-loader/dist/index.js', options: {} }]
+    });
+
     config.module.rules.push({
       test: /qrCodeWorker_Workerize.js$/,
       include: path.resolve(__dirname, 'src', 'workers'),
@@ -48,8 +56,11 @@ module.exports = override(
       use: [{ loader: require.resolve('wasm-loader'), options: {} }]
     });
 
+<<<<<<< Updated upstream
     
 
+=======
+>>>>>>> Stashed changes
     return config;
   },
   useBabelRc(),
