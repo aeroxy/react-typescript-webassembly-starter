@@ -44,11 +44,11 @@ module.exports = override(
       use: [{ loader: './modules/worker-loader/dist/index.js', options: {} }]
     });
 
-    config.module.rules.push({
-      test: /qrCodeWorker_Workerize.js$/,
-      include: path.resolve(__dirname, 'src', 'workers'),
-      use: [{ loader: require.resolve('workerize-loader'), options: {} }]
-    });
+    // config.module.rules.push({
+    //   test: /qrCodeWorker_Workerize.js$/,
+    //   include: path.resolve(__dirname, 'src', 'workers'),
+    //   use: [{ loader: require.resolve('workerize-loader'), options: {} }]
+    // });
 
     config.module.rules.push({
       test: wasmExtensionRegExp,
@@ -56,11 +56,6 @@ module.exports = override(
       use: [{ loader: require.resolve('wasm-loader'), options: {} }]
     });
 
-<<<<<<< Updated upstream
-    
-
-=======
->>>>>>> Stashed changes
     return config;
   },
   useBabelRc(),
